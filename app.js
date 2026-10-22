@@ -226,30 +226,24 @@ app.use((error, req, res, next) => {
 });
 
 // Connect to MongoDB Atlas and start the server
-async function startServer() {
-  try {
-    const mongoUri = process.env.MONGO_URI;
 
-    if (!mongoUri) {
-      throw new Error("MONGO_URI is missing. Check your .env file.");
-    }
+const mongoUri = process.env.MONGO_URI;
 
-    await mongoose.connect(mongoUri, {
-      serverSelectionTimeoutMS: 10000
-    });
-
-    console.log("Connected to MongoDB Atlas successfully.");
-
-    const PORT = process.env.PORT || 3000;
-
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`Book Management API running on port ${PORT}`);
-      console.log(`Local URL: http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error("Server startup failed:", error.message);
-    process.exit(1);
-  }
+if (!mongoUri) {
+  throw new Error("MONGO_URI is missing.");
 }
 
-startServer();
+mongoose.connect(mongoUri)
+  .then(() => console.log("Connected to MongoDB Atlas successfully."))
+  .catch((error) => console.error("MongoDB connection failed:", error.message));
+
+module.exports = app;
+
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Book Management API running on port ${PORT}`);
+  });
+}
+
