@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#101828" />
+  <title>BookSpace | Book Management</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script src="/script.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">
+      <span class="brand-icon">B</span>
+      <span>BookSpace<small>YOUR PERSONAL LIBRARY</small></span>
+    </a>
+    <span class="api-status"><span class="status-dot"></span> API Library</span>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">YOUR READING SPACE</p>
+        <h1>Every book has a <span>story.</span></h1>
+        <p class="hero-text">
+          Organize your collection, discover your next read,
+          and keep every title in one place.
+        </p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="book-stack">
+          <div class="book book-one">READ<br />MORE</div>
+          <div class="book book-two">DREAM<br />BIG</div>
+          <div class="book book-three">EXPLORE</div>
+        </div>
+        <span class="sparkle">✦</span>
+      </div>
+    </section>
+
+    <section class="stats">
+      <article class="stat-card">
+        <span class="stat-icon">▤</span>
+        <div><p>Total books</p><h2 id="totalBooks">0</h2></div>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon">✎</span>
+        <div><p>Unique authors</p><h2 id="totalAuthors">0</h2></div>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon">⌕</span>
+        <div><p>Genres</p><h2 id="totalGenres">0</h2></div>
+      </article>
+    </section>
+
+    <section class="library">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">COLLECTION</p>
+          <h2>My library</h2>
+          <p class="muted">All your favourite books, together.</p>
+        </div>
+        <button class="btn btn-primary" id="addBookBtn">
+          <span>＋</span> Add a book
+        </button>
+      </div>
+
+      <div class="toolbar">
+        <label class="search-box">
+          <span>⌕</span>
+          <input id="searchInput" type="search"
+            placeholder="Search title, author or genre..." />
+        </label>
+        <select id="genreFilter" aria-label="Filter by genre">
+          <option value="">All genres</option>
+        </select>
+        <button class="btn btn-light" id="refreshBtn">↻ Refresh</button>
+      </div>
+
+      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+      <div id="loading" class="loading" hidden>Loading your library...</div>
+      <div id="bookGrid" class="book-grid"></div>
+
+      <div id="emptyState" class="empty-state" hidden>
+        <div class="empty-icon">▤</div>
+        <h3>No books found</h3>
+        <p>Try another search or add a book to your collection.</p>
+        <button class="btn btn-primary" id="emptyAddBtn">＋ Add your first book</button>
+      </div>
+    </section>
+
+    <footer>
+      <span>BookSpace</span> · Built with HTML, CSS, JavaScript & Express
+    </footer>
+  </main>
+
+  <dialog id="bookDialog" class="book-dialog">
+    <form id="bookForm">
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">LIBRARY MANAGEMENT</p>
+          <h2 id="dialogTitle">Add a new book</h2>
+        </div>
+        <button type="button" class="icon-btn" id="closeDialog"
+          aria-label="Close form">✕</button>
+      </div>
+
+      <label for="title">Book title</label>
+      <input id="title" name="title" required maxlength="150"
+        placeholder="e.g. Atomic Habits" />
+
+      <label for="author">Author</label>
+      <input id="author" name="author" required maxlength="100"
+        placeholder="e.g. James Clear" />
+
+      <label for="genre">Genre</label>
+      <input id="genre" name="genre" required maxlength="60"
+        placeholder="e.g. Self-help" />
+
+      <label for="publishedYear">Publication year</label>
+      <input id="publishedYear" name="publishedYear" type="number"
+        min="1" max="2100" required placeholder="e.g. 2018" />
+
+      <p id="formError" class="form-error" role="alert" hidden></p>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-light" id="cancelBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="submitBtn">Save book</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="confirmDialog" class="confirm-dialog" hidden>
+    <div class="confirm-card">
+      <div class="delete-icon">!</div>
+      <h2>Delete this book?</h2>
+      <p id="deleteMessage">This action cannot be undone.</p>
+      <div class="dialog-actions">
+        <button class="btn btn-light" id="keepBookBtn">Cancel</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn">Delete book</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
