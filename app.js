@@ -46,7 +46,7 @@ const Book = mongoose.model("Book", bookSchema);
 
 // Validate book data
 function validateBook(data) {
-  const { title, author, genre, publishedYear } = data;
+  const { title, author, genre, publishedYear } = data || {};
 
   if (
     typeof title !== "string" ||
@@ -65,6 +65,44 @@ function validateBook(data) {
   return null;
 }
 
+// Reusable MongoDB connection for local and serverless environments
+let dbConnectionPromise;
+
+async function connectDB() {
+  if (mongoose.connection.readyState === 1) {
+    return;
+  }
+
+  if (!process.env.MONGO_URI) {
+    throw new Error("MONGO_URI environment variable is missing.");
+  }
+
+  if (!dbConnectionPromise) {
+    dbConnectionPromise = mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 10000
+    }).catch((error) => {
+      dbConnectionPromise = null;
+      throw error;
+    });
+  }
+
+  await dbConnectionPromise;
+}
+
+// Ensure the database is connected before processing requests
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("MongoDB connection failed:", error.message);
+
+    res.status(503).json({
+      error: "Database connection unavailable. Please try again later."
+    });
+  }
+});
+
 // Home route: serve frontend
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
@@ -72,11 +110,12 @@ app.get("/", (req, res) => {
 
 // API health check
 app.get("/api", (req, res) => {
-  res.json({
+  res.status(200).json({
     message: "Book Management API is running!",
-    database: mongoose.connection.readyState === 1
-      ? "connected"
-      : "disconnected"
+    database:
+      mongoose.connection.readyState === 1
+        ? "connected"
+        : "disconnected"
   });
 });
 
@@ -218,27 +257,23 @@ app.use("/api", (req, res) => {
 
 // Handle malformed JSON
 app.use((error, req, res, next) => {
-  if (error instanceof SyntaxError && error.status === 400 && "body" in error) {
-    return res.status(400).json({ error: "Invalid JSON request body." });
+  if (
+    error instanceof SyntaxError &&
+    error.status === 400 &&
+    "body" in error
+  ) {
+    return res.status(400).json({
+      error: "Invalid JSON request body."
+    });
   }
 
   next(error);
 });
 
-// Connect to MongoDB Atlas and start the server
-
-const mongoUri = process.env.MONGO_URI;
-
-if (!mongoUri) {
-  throw new Error("MONGO_URI is missing.");
-}
-
-mongoose.connect(mongoUri)
-  .then(() => console.log("Connected to MongoDB Atlas successfully."))
-  .catch((error) => console.error("MongoDB connection failed:", error.message));
-
+// Export app for Vercel
 module.exports = app;
 
+// Start a local server only when running directly with Node.js
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
 
@@ -246,4 +281,3 @@ if (require.main === module) {
     console.log(`Book Management API running on port ${PORT}`);
   });
 }
-
